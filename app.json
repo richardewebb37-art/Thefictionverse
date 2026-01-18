@@ -1,0 +1,47 @@
+{
+  "name": "The Fictionverse",
+  "slug": "the-fictionverse",
+  "version": "1.0.0",
+  "orientation": "portrait",
+  "userInterfaceStyle": "dark",
+  "assetBundlePatterns": [
+    "**/*"
+  ],
+  "plugins": [
+    "expo-av",
+    "expo-document-picker"
+  ],
+  "ios": {
+    "supportsTablet": true,
+    "bundleIdentifier": "com.yourcompany.minimalenginetest"
+  },
+  "android": {
+    "adaptiveIcon": {
+      "backgroundColor": "#000000"
+    },
+    "package": "com.yourcompany.minimalenginetest",
+    "versionCode": 36,
+    "permissions": [
+      "android.permission.RECORD_AUDIO",
+      "android.permission.MODIFY_AUDIO_SETTINGS"
+    ]
+  },
+  "web": {},
+  "extra": {
+    "eas": {
+      "projectId": "b9186a4b-e534-4e5e-8951-6b583a8078dd"
+    }
+  },
+  "owner": "ericwebb341",
+  "runtimeVersion": {
+    "policy": "appVersion"
+  },
+  "updates": {
+    "url": "https://u.expo.dev/b9186a4b-e534-4e5e-8951-6b583a8078dd"
+  },
+  "sdkVersion": "52.0.0",
+  "platforms": [
+    "ios",
+    "android"
+  ]
+}
