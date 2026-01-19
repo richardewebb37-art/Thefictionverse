@@ -29,7 +29,7 @@
   "web": {},
   "extra": {
     "eas": {
-      "projectId": "b9186a4b-e534-4e5e-8951-6b583a8078dd"
+      "projectId": "XfhffeyTQHIFeukTP-qyDUDvLtgf9kpmwxuTDG33"
     }
   },
   "owner": "ericwebb341",
@@ -37,7 +37,7 @@
     "policy": "appVersion"
   },
   "updates": {
-    "url": "https://u.expo.dev/b9186a4b-e534-4e5e-8951-6b583a8078dd"
+    "url": "https://u.expo.dev/XfhffeyTQHIFeukTP-qyDUDvLtgf9kpmwxuTDG33"
   },
   "sdkVersion": "52.0.0",
   "platforms": [
