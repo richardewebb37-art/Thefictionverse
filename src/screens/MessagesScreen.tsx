@@ -1,63 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useMessage, Conversation, Message } from '../contexts/MessageContext';
 
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'other';
-  timestamp: string;
-}
+// Helper function to format timestamp
+const formatTimestamp = (timestamp?: number) => {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
 
-interface Conversation {
-  id: string;
-  name: string;
-  lastMessage: string;
-  timestamp: string;
-  unread: number;
-}
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+};
 
 const MessagesScreen = () => {
+  const { conversations, messages, sendMessage, getMessages, loading } = useMessage();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messageText, setMessageText] = useState('');
-  
-  const [conversations, setConversations] = useState<Conversation[]>([
-    { id: '1', name: 'Support Team', lastMessage: 'How can we help you today?', timestamp: '2 min ago', unread: 1 },
-    { id: '2', name: 'John Smith', lastMessage: 'Trip approved!', timestamp: '1 hour ago', unread: 0 },
-    { id: '3', name: 'Sarah Johnson', lastMessage: 'See you tomorrow', timestamp: '3 hours ago', unread: 2 },
-  ]);
+  const [localMessages, setLocalMessages] = useState<Message[]>([]);
 
-  const [messages, setMessages] = useState<Record<string, Message[]>>({
-    '1': [
-      { id: '1', text: 'Hello! How can we help you today?', sender: 'other', timestamp: '2 min ago' },
-    ],
-    '2': [
-      { id: '1', text: 'I submitted my trip request', sender: 'user', timestamp: '2 hours ago' },
-      { id: '2', text: 'Trip approved!', sender: 'other', timestamp: '1 hour ago' },
-    ],
-    '3': [
-      { id: '1', text: 'Meeting at 9 AM tomorrow?', sender: 'other', timestamp: '4 hours ago' },
-      { id: '2', text: 'Yes, see you tomorrow', sender: 'other', timestamp: '3 hours ago' },
-    ],
-  });
+  // Load messages when conversation is selected
+  useEffect(() => {
+    if (selectedConversation) {
+      const conversationMessages = getMessages(selectedConversation.id);
+      setLocalMessages(conversationMessages);
+    }
+  }, [selectedConversation, messages, getMessages]);
 
-  const sendMessage = () => {
+  const handleSendMessage = () => {
     if (messageText.trim() && selectedConversation) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        text: messageText,
-        sender: 'user',
-        timestamp: 'Just now',
-      };
-      
-      setMessages({
-        ...messages,
-        [selectedConversation.id]: [...(messages[selectedConversation.id] || []), newMessage],
-      });
-      
+      sendMessage(selectedConversation.id, messageText.trim());
       setMessageText('');
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading messages...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const renderConversation = ({ item }: { item: Conversation }) => (
     <TouchableOpacity 
@@ -70,13 +61,13 @@ const MessagesScreen = () => {
       <View style={styles.conversationInfo}>
         <View style={styles.conversationHeader}>
           <Text style={styles.conversationName}>{item.name}</Text>
-          <Text style={styles.conversationTime}>{item.timestamp}</Text>
+          <Text style={styles.conversationTime}>{formatTimestamp(item.lastMessageTime)}</Text>
         </View>
-        <Text style={styles.lastMessage} numberOfLines={1}>{item.lastMessage}</Text>
+        <Text style={styles.lastMessage} numberOfLines={1}>{item.lastMessage || 'No messages yet'}</Text>
       </View>
-      {item.unread > 0 && (
+      {item.unreadCount > 0 && (
         <View style={styles.unreadBadge}>
-          <Text style={styles.unreadCount}>{item.unread}</Text>
+          <Text style={styles.unreadCount}>{item.unreadCount}</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -88,7 +79,7 @@ const MessagesScreen = () => {
       item.sender === 'user' ? styles.userMessage : styles.otherMessage
     ]}>
       <Text style={styles.messageText}>{item.text}</Text>
-      <Text style={styles.messageTime}>{item.timestamp}</Text>
+      <Text style={styles.messageTime}>{formatTimestamp(item.timestamp)}</Text>
     </View>
   );
 
@@ -108,7 +99,7 @@ const MessagesScreen = () => {
         </View>
 
         <FlatList
-          data={messages[selectedConversation.id] || []}
+          data={localMessages}
           renderItem={renderMessage}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.messagesList}
@@ -125,7 +116,7 @@ const MessagesScreen = () => {
             value={messageText}
             onChangeText={setMessageText}
           />
-          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+          <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
             <Text style={styles.sendButtonText}>Send</Text>
           </TouchableOpacity>
         </KeyboardAvoidingView>
@@ -151,6 +142,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 16,
   },
   header: {
     padding: 20,

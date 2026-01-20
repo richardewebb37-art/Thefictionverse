@@ -1,28 +1,53 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../contexts/AuthContext';
 
 const ProfileScreen = () => {
+  const { user, updateProfile, isAuthenticated } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
-    name: 'John Doe',
-    email: 'john.doe@fictionverse.com',
-    phone: '+1 (555) 123-4567',
-    company: 'Fictionverse Inc.',
-    title: 'Fleet Manager',
-    bio: 'Managing fleet operations since 2020',
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    title: '',
+    bio: '',
   });
 
   const [tempProfile, setTempProfile] = useState(profile);
+
+  // Load user data from AuthContext
+  useEffect(() => {
+    if (user) {
+      const userProfile = {
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        company: user.company || '',
+        title: user.title || '',
+        bio: user.bio || '',
+      };
+      setProfile(userProfile);
+      setTempProfile(userProfile);
+    }
+  }, [user]);
 
   const handleEdit = () => {
     setTempProfile(profile);
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    setProfile(tempProfile);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      await updateProfile(tempProfile);
+      setProfile(tempProfile);
+      setIsEditing(false);
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update profile');
+      console.error(error);
+    }
   };
 
   const handleCancel = () => {

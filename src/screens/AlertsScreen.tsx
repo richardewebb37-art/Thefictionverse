@@ -1,24 +1,54 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-interface Alert {
-  id: string;
-  title: string;
-  message: string;
-  severity: 'low' | 'medium' | 'high';
-  timestamp: string;
-}
+import { useAlert } from '../contexts/AlertContext';
 
 const AlertsScreen = () => {
-  const [alerts, setAlerts] = useState<Alert[]>([
-    { id: '1', title: 'Engine Warning', message: 'Temperature above normal', severity: 'high', timestamp: '2 min ago' },
-    { id: '2', title: 'Fuel Low', message: 'Tank at 15% capacity', severity: 'medium', timestamp: '1 hour ago' },
-    { id: '3', title: 'System Update', message: 'New version available', severity: 'low', timestamp: '3 hours ago' },
-  ]);
+  const { alerts, loading, clearAlert, clearAllAlerts, markAsRead } = useAlert();
+  const [selectedAlerts, setSelectedAlerts] = useState<string[]>([]);
 
-  const clearAlert = (id: string) => {
-    setAlerts(alerts.filter(alert => alert.id !== id));
+  const handleClearAlert = async (id: string) => {
+    try {
+      await clearAlert(id);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to clear alert');
+      console.error(error);
+    }
+  };
+
+  const handleClearAll = async () => {
+    Alert.alert(
+      'Clear All Alerts',
+      'Are you sure you want to clear all alerts?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await clearAllAlerts();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to clear alerts');
+              console.error(error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const formatTimestamp = (timestamp: number) => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes} min ago`;
+    if (hours < 24) return `${hours} hours ago`;
+    return `${days} days ago`;
   };
 
   const getSeverityColor = (severity: string) => {
@@ -30,15 +60,15 @@ const AlertsScreen = () => {
     }
   };
 
-  const renderAlert = ({ item }: { item: Alert }) => (
-    <TouchableOpacity style={styles.alertCard} onLongPress={() => clearAlert(item.id)}>
+  const renderAlert = ({ item }: { item: any }) => (
+    <TouchableOpacity style={styles.alertCard} onPress={() => markAsRead(item.id)}>
       <View style={[styles.severityIndicator, { backgroundColor: getSeverityColor(item.severity) }]} />
       <View style={styles.alertContent}>
-        <Text style={styles.alertTitle}>{item.title}</Text>
+        <Text style={[styles.alertTitle, !item.read && styles.unread]}>{item.title}</Text>
         <Text style={styles.alertMessage}>{item.message}</Text>
-        <Text style={styles.alertTimestamp}>{item.timestamp}</Text>
+        <Text style={styles.alertTimestamp}>{formatTimestamp(item.timestamp)}</Text>
       </View>
-      <TouchableOpacity style={styles.clearButton} onPress={() => clearAlert(item.id)}>
+      <TouchableOpacity style={styles.clearButton} onPress={() => handleClearAlert(item.id)}>
         <Text style={styles.clearButtonText}>✕</Text>
       </TouchableOpacity>
     </TouchableOpacity>
@@ -47,19 +77,32 @@ const AlertsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Alerts</Text>
-        <Text style={styles.subtitle}>{alerts.length} active alerts</Text>
+        <View>
+          <Text style={styles.title}>Alerts</Text>
+          <Text style={styles.subtitle}>{alerts.length} active alerts</Text>
+        </View>
+        {alerts.length > 0 && (
+          <TouchableOpacity style={styles.clearAllButton} onPress={handleClearAll}>
+            <Text style={styles.clearAllButtonText}>Clear All</Text>
+          </TouchableOpacity>
+        )}
       </View>
-      <FlatList
-        data={alerts}
-        renderItem={renderAlert}
-        keyExtractor={item => item.id}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No alerts</Text>
-          </View>
-        }
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading alerts...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={alerts}
+          renderItem={renderAlert}
+          keyExtractor={item => item.id}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No alerts</Text>
+            </View>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -131,6 +174,29 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     color: '#666',
+  },
+  unread: {
+    fontWeight: 'bold',
+  },
+  clearAllButton: {
+    backgroundColor: '#ff0000',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  clearAllButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#666',
+    fontSize: 16,
   },
 });
 

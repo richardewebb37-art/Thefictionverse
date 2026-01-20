@@ -1,9 +1,14 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Providers
+import { SettingsProvider } from './src/contexts/SettingsContext';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { TripProvider } from './src/contexts/TripContext';
 
 // Screens
 import HomeScreen from './src/screens/HomeScreen';

@@ -1,51 +1,50 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-interface Expense {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  date: string;
-}
+import { useExpense } from '../contexts/ExpenseContext';
 
 const ExpensesScreen = () => {
-  const [expenses, setExpenses] = useState<Expense[]>([
-    { id: '1', description: 'Fuel', amount: 45.50, category: 'Transport', date: '2024-01-19' },
-    { id: '2', description: 'Lunch', amount: 12.00, category: 'Food', date: '2024-01-19' },
-    { id: '3', description: 'Hotel', amount: 120.00, category: 'Accommodation', date: '2024-01-18' },
-  ]);
-  
+  const { expenses, loading, addExpense, deleteExpense, getTotalExpenses } = useExpense();
   const [modalVisible, setModalVisible] = useState(false);
-  const [newExpense, setNewExpense] = useState({ description: '', amount: '', category: '' });
-  const [total, setTotal] = useState(expenses.reduce((sum, e) => sum + e.amount, 0));
+  const [newExpense, setNewExpense] = useState({ description: '', amount: '', category: 'other' as const });
+  const [total, setTotal] = useState(0);
 
-  const addExpense = () => {
-    if (newExpense.description && newExpense.amount) {
-      const expense: Expense = {
-        id: Date.now().toString(),
+  // Update total when expenses change
+  useEffect(() => {
+    setTotal(getTotalExpenses());
+  }, [expenses, getTotalExpenses]);
+
+  const handleAddExpense = async () => {
+    if (!newExpense.description || !newExpense.amount) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    try {
+      await addExpense({
         description: newExpense.description,
         amount: parseFloat(newExpense.amount),
-        category: newExpense.category || 'General',
+        category: newExpense.category,
         date: new Date().toISOString().split('T')[0],
-      };
-      setExpenses([...expenses, expense]);
-      setTotal(total + expense.amount);
+      });
       setModalVisible(false);
-      setNewExpense({ description: '', amount: '', category: '' });
+      setNewExpense({ description: '', amount: '', category: 'other' });
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add expense');
+      console.error(error);
     }
   };
 
-  const deleteExpense = (id: string) => {
-    const expenseToDelete = expenses.find(e => e.id === id);
-    if (expenseToDelete) {
-      setExpenses(expenses.filter(e => e.id !== id));
-      setTotal(total - expenseToDelete.amount);
+  const handleDeleteExpense = async (id: string) => {
+    try {
+      await deleteExpense(id);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to delete expense');
+      console.error(error);
     }
   };
 
-  const renderExpense = ({ item }: { item: Expense }) => (
+  const renderExpense = ({ item }: { item: any }) => (
     <View style={styles.expenseCard}>
       <View style={styles.expenseInfo}>
         <Text style={styles.expenseDescription}>{item.description}</Text>
@@ -54,7 +53,7 @@ const ExpensesScreen = () => {
       </View>
       <View style={styles.expenseAmountContainer}>
         <Text style={styles.expenseAmount}>${item.amount.toFixed(2)}</Text>
-        <TouchableOpacity style={styles.deleteButton} onPress={() => deleteExpense(item.id)}>
+        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteExpense(item.id)}>
           <Text style={styles.deleteButtonText}>✕</Text>
         </TouchableOpacity>
       </View>
@@ -281,6 +280,25 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#666',
+    fontSize: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    color: '#666',
+    fontSize: 16,
   },
 });
 

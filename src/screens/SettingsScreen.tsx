@@ -1,50 +1,99 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const SettingsScreen = () => {
-  const [settings, setSettings] = useState({
-    darkMode: true,
-    pushNotifications: true,
-    emailNotifications: false,
-    locationServices: true,
-    autoSync: true,
-    soundEnabled: true,
-    vibrationEnabled: true,
-    lowDataMode: false,
-  });
+  const { settings, updateSetting, resetSettings } = useSettings();
+  const { logout } = useAuth();
 
-  const toggleSetting = (key: string) => {
-    setSettings({ ...settings, [key]: !settings[key as keyof typeof settings] });
+  const toggleSetting = (key: keyof typeof settings) => {
+    updateSetting(key, !settings[key]).catch((error) => {
+      Alert.alert('Error', 'Failed to update setting');
+      console.error(error);
+    });
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await logout();
+              // Navigation will automatically redirect to login screen
+            } catch (error) {
+              Alert.alert('Error', 'Failed to log out');
+              console.error(error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleClearData = () => {
+    Alert.alert(
+      'Clear All Data',
+      'This will permanently delete all your data. This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Clear Data',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await resetSettings();
+              Alert.alert('Success', 'All settings have been reset to defaults');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to clear data');
+              console.error(error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const sections = [
     {
       title: 'Appearance',
       items: [
-        { key: 'darkMode', label: 'Dark Mode', description: 'Use dark theme' },
+        { key: 'darkMode' as const, label: 'Dark Mode', description: 'Use dark theme' },
       ],
     },
     {
       title: 'Notifications',
       items: [
-        { key: 'pushNotifications', label: 'Push Notifications', description: 'Receive push alerts' },
-        { key: 'emailNotifications', label: 'Email Notifications', description: 'Get email updates' },
-        { key: 'soundEnabled', label: 'Sound', description: 'Play notification sounds' },
-        { key: 'vibrationEnabled', label: 'Vibration', description: 'Vibrate on alerts' },
+        { key: 'pushNotifications' as const, label: 'Push Notifications', description: 'Receive push alerts' },
+        { key: 'emailNotifications' as const, label: 'Email Notifications', description: 'Get email updates' },
+        { key: 'soundEnabled' as const, label: 'Sound', description: 'Play notification sounds' },
+        { key: 'vibrationEnabled' as const, label: 'Vibration', description: 'Vibrate on alerts' },
       ],
     },
     {
       title: 'Privacy & Security',
       items: [
-        { key: 'locationServices', label: 'Location Services', description: 'Allow location access' },
+        { key: 'locationServices' as const, label: 'Location Services', description: 'Allow location access' },
       ],
     },
     {
       title: 'Data & Storage',
       items: [
-        { key: 'autoSync', label: 'Auto Sync', description: 'Sync data automatically' },
-        { key: 'lowDataMode', label: 'Low Data Mode', description: 'Reduce data usage' },
+        { key: 'autoSync' as const, label: 'Auto Sync', description: 'Sync data automatically' },
+        { key: 'lowDataMode' as const, label: 'Low Data Mode', description: 'Reduce data usage' },
       ],
     },
   ];
@@ -65,10 +114,10 @@ const SettingsScreen = () => {
                   <Text style={styles.settingDescription}>{item.description}</Text>
                 </View>
                 <Switch
-                  value={settings[item.key as keyof typeof settings]}
+                  value={settings[item.key]}
                   onValueChange={() => toggleSetting(item.key)}
                   trackColor={{ false: '#333', true: '#007aff' }}
-                  thumbColor={settings[item.key as keyof typeof settings] ? '#fff' : '#999'}
+                  thumbColor={settings[item.key] ? '#fff' : '#999'}
                 />
               </View>
             ))}
@@ -136,11 +185,11 @@ const SettingsScreen = () => {
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Version</Text>
-            <Text style={styles.infoValue}>1.0.0</Text>
+            <Text style={styles.infoValue}>1.2.0</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Build</Text>
-            <Text style={styles.infoValue}>37</Text>
+            <Text style={styles.infoValue}>38</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Platform</Text>
@@ -148,11 +197,11 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutButtonText}>Log Out</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.clearDataButton}>
+        <TouchableOpacity style={styles.clearDataButton} onPress={handleClearData}>
           <Text style={styles.clearDataButtonText}>Clear All Data</Text>
         </TouchableOpacity>
       </ScrollView>
