@@ -10,6 +10,9 @@ import { Text } from 'react-native';
 import { SettingsProvider } from './src/contexts/SettingsContext';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { TripProvider } from './src/contexts/TripContext';
+import { AlertProvider } from './src/contexts/AlertContext';
+import { ExpenseProvider } from './src/contexts/ExpenseContext';
+import { MessageProvider } from './src/contexts/MessageContext';
 
 // Screens
 import HomeScreen from './src/screens/HomeScreen';
@@ -95,9 +98,16 @@ export default function App() {
   return (
     <>
       <StatusBar style="auto" />
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
+      <SafeAreaProvider>
+        <AuthProvider>
+          <TripProvider>
+            <AlertProvider>
+              <ExpenseProvider>
+                <MessageProvider>
+                  <SettingsProvider>
+                    <NavigationContainer>
+                      <Stack.Navigator
+                        screenOptions={{
             headerStyle: {
               backgroundColor: '#000',
               borderBottomColor: '#333',
@@ -161,6 +171,13 @@ export default function App() {
           />
         </Stack.Navigator>
       </NavigationContainer>
+                  </SettingsProvider>
+                </MessageProvider>
+              </ExpenseProvider>
+            </AlertProvider>
+          </TripProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
     </>
   );
 }
