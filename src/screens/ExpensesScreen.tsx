@@ -6,7 +6,7 @@ import { useExpense } from '../contexts/ExpenseContext';
 const ExpensesScreen = () => {
   const { expenses, loading, addExpense, deleteExpense, getTotalExpenses } = useExpense();
   const [modalVisible, setModalVisible] = useState(false);
-  const [newExpense, setNewExpense] = useState({ description: '', amount: '', category: 'other' as const });
+  const [newExpense, setNewExpense] = useState<{ description: string; amount: string; category: 'fuel' | 'maintenance' | 'tolls' | 'food' | 'lodging' | 'other' }>({ description: '', amount: '', category: 'other' });
   const [total, setTotal] = useState(0);
 
   // Update total when expenses change
@@ -28,7 +28,7 @@ const ExpensesScreen = () => {
         date: new Date().toISOString().split('T')[0],
       });
       setModalVisible(false);
-      setNewExpense({ description: '', amount: '', category: 'other' });
+      setNewExpense({ description: '', amount: '', category: 'other' as const });
     } catch (error) {
       Alert.alert('Error', 'Failed to add expense');
       console.error(error);
@@ -116,7 +116,7 @@ const ExpensesScreen = () => {
               placeholder="Category"
               placeholderTextColor="#666"
               value={newExpense.category}
-              onChangeText={(text) => setNewExpense({ ...newExpense, category: text })}
+              onChangeText={(text) => setNewExpense({ ...newExpense, category: text as 'fuel' | 'maintenance' | 'tolls' | 'food' | 'lodging' | 'other' })}
             />
 
             <View style={styles.modalButtons}>
@@ -129,7 +129,7 @@ const ExpensesScreen = () => {
               
               <TouchableOpacity 
                 style={[styles.modalButton, styles.saveButton]}
-                onPress={addExpense}
+                onPress={handleAddExpense}
               >
                 <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
