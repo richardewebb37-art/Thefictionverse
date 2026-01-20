@@ -1,29 +1,14 @@
 {
   "cli": {
-    "version": ">= 5.2.0"
+    "version": ">= 5.2.0",
+    "appVersionSource": "local"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "preview": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      }
-    },
     "production": {
       "android": {
-        "buildType": "apk"
-      },
-      "ios": {
-        "buildConfiguration": "Release"
+        "buildType": "apk",
+        "credentialsSource": "local"
       }
     }
-  },
-  "submit": {
-    "production": {}
-  },
-  "projectId": "XfhffeyTQHIFeukTP-qyDUDvLtgf9kpmwxuTDG33"
+  }
 }
