@@ -1,313 +1,348 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import EngineStatusBar from '../components/EngineStatusBar';
 import { useEngine } from '../contexts/EngineContext';
 
 const HomeScreen = () => {
   const navigation = useNavigation<any>();
-  const { isReady, engine } = useEngine();
+  const { engineState, engineStatus, getServiceStatus } = useEngine();
+  const [loading, setLoading] = React.useState(false);
+
+  const isEngineReady = engineState === 'RUNNING';
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    // Simulate refresh
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Engine Status Bar - Always visible at top */}
-      <EngineStatusBar showDetails={true} />
-      
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>The Fictionverse</Text>
-          <Text style={styles.subtitle}>Welcome back</Text>
-        </View>
+      <EngineStatusBar />
 
-        {/* System Status Card - Now shows real engine status */}
-        <View style={[styles.summaryCard, !isReady && styles.summaryCardError]}>
-          <Text style={styles.cardTitle}>System Status</Text>
-          <Text style={[styles.cardText, { color: isReady ? '#00ff00' : '#ff0000' }]}>
-            {isReady ? 'All systems operational' : 'Engine not ready - some features may not work'}
-          </Text>
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.actionButtons}>
-            <TouchableOpacity 
-              style={[styles.actionButton, !isReady && styles.actionButtonDisabled]}
-              onPress={() => navigation.navigate('AlertsTab')}
-              disabled={!isReady}
-            >
-              <Text style={styles.actionIcon}>🔔</Text>
-              <Text style={styles.actionButtonText}>View Alerts</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.actionButton, !isReady && styles.actionButtonDisabled]}
-              onPress={() => navigation.navigate('ProfileTab', { screen: 'Trips' })}
-              disabled={!isReady}
-            >
-              <Text style={styles.actionIcon}>🚗</Text>
-              <Text style={styles.actionButtonText}>Start Trip</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.actionButton, !isReady && styles.actionButtonDisabled]}
-              onPress={() => navigation.navigate('MoreTab')}
-              disabled={!isReady}
-            >
-              <Text style={styles.actionIcon}>📊</Text>
-              <Text style={styles.actionButtonText}>View Reports</Text>
-            </TouchableOpacity>
+      <SafeAreaView style={styles.content}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={handleRefresh}
+              tintColor="#3B82F6"
+            />
+          }
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>The Fictionverse</Text>
+            <Text style={styles.subtitle}>Welcome back</Text>
           </View>
-        </View>
 
-        {/* Navigation Menu */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Menu</Text>
-          
-          <TouchableOpacity 
-            style={[styles.menuItem, !isReady && styles.menuItemDisabled]}
-            onPress={() => navigation.navigate('Settings')}
-            disabled={!isReady}
-          >
-            <Text style={styles.menuIcon}>⚙️</Text>
-            <Text style={styles.menuText}>Settings</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.menuItem, !isReady && styles.menuItemDisabled]}
-            onPress={() => navigation.navigate('Notifications')}
-            disabled={!isReady}
-          >
-            <Text style={styles.menuIcon}>🔔</Text>
-            <Text style={styles.menuText}>Notifications</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.menuItem, !isReady && styles.menuItemDisabled]}
-            onPress={() => navigation.navigate('ProfileTab', { screen: 'Expenses' })}
-            disabled={!isReady}
-          >
-            <Text style={styles.menuIcon}>💰</Text>
-            <Text style={styles.menuText}>Expenses</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.menuItem, !isReady && styles.menuItemDisabled]}
-            onPress={() => navigation.navigate('Help')}
-            disabled={!isReady}
-          >
-            <Text style={styles.menuIcon}>❓</Text>
-            <Text style={styles.menuText}>Help & Support</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.menuItem, !isReady && styles.menuItemDisabled]}
-            onPress={() => navigation.navigate('Admin')}
-            disabled={!isReady}
-          >
-            <Text style={styles.menuIcon}>🔐</Text>
-            <Text style={styles.menuText}>Admin Panel</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.menuItem, !isReady && styles.menuItemDisabled]}
-            onPress={() => navigation.navigate('OneTap')}
-            disabled={!isReady}
-          >
-            <Text style={styles.menuIcon}>👆</Text>
-            <Text style={styles.menuText}>One-Tap Actions</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.menuItem, !isReady && styles.menuItemDisabled]}
-            onPress={() => navigation.navigate('DirectCall')}
-            disabled={!isReady}
-          >
-            <Text style={styles.menuIcon}>📞</Text>
-            <Text style={styles.menuText}>Direct Call</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.menuItem, !isReady && styles.menuItemDisabled]}
-            onPress={() => navigation.navigate('Navigation')}
-            disabled={!isReady}
-          >
-            <Text style={styles.menuIcon}>🗺️</Text>
-            <Text style={styles.menuText}>Navigation</Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Engine Services Status */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Services</Text>
-          <View style={styles.servicesGrid}>
-            <ServiceCard name="Auth" active={engine.services.auth} />
-            <ServiceCard name="Settings" active={engine.services.settings} />
-            <ServiceCard name="Trips" active={engine.services.trips} />
-            <ServiceCard name="Alerts" active={engine.services.alerts} />
-            <ServiceCard name="Expenses" active={engine.services.expenses} />
-            <ServiceCard name="Messages" active={engine.services.messages} />
+          {/* System Status Card - Shows real engine status */}
+          <View style={[styles.summaryCard, !isEngineReady && styles.summaryCardError]}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>System Status</Text>
+              {!isEngineReady && <ActivityIndicator size="small" color="#F59E0B" />}
+            </View>
+            <Text style={[styles.cardText, { color: isEngineReady ? '#10B981' : '#EF4444' }]}>
+              {isEngineReady ? 'All systems operational' : 'Engine initializing - some features may not work'}
+            </Text>
+            <Text style={styles.cardSubtext}>
+              Engine State: {engineState}
+            </Text>
           </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+
+          {/* Service Status Cards */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Services</Text>
+            <View style={styles.serviceGrid}>
+              <View style={styles.serviceCard}>
+                <Ionicons
+                  name={getServiceStatus('auth') ? 'checkmark-circle' : 'close-circle'}
+                  size={24}
+                  color={getServiceStatus('auth') ? '#10B981' : '#EF4444'}
+                />
+                <Text style={styles.serviceCardTitle}>Auth</Text>
+                <Text style={styles.serviceCardText}>
+                  {getServiceStatus('auth') ? 'Online' : 'Offline'}
+                </Text>
+              </View>
+              <View style={styles.serviceCard}>
+                <Ionicons
+                  name={getServiceStatus('settings') ? 'checkmark-circle' : 'close-circle'}
+                  size={24}
+                  color={getServiceStatus('settings') ? '#10B981' : '#EF4444'}
+                />
+                <Text style={styles.serviceCardTitle}>Settings</Text>
+                <Text style={styles.serviceCardText}>
+                  {getServiceStatus('settings') ? 'Online' : 'Offline'}
+                </Text>
+              </View>
+              <View style={styles.serviceCard}>
+                <Ionicons
+                  name={getServiceStatus('trips') ? 'checkmark-circle' : 'close-circle'}
+                  size={24}
+                  color={getServiceStatus('trips') ? '#10B981' : '#EF4444'}
+                />
+                <Text style={styles.serviceCardTitle}>Trips</Text>
+                <Text style={styles.serviceCardText}>
+                  {getServiceStatus('trips') ? 'Online' : 'Offline'}
+                </Text>
+              </View>
+              <View style={styles.serviceCard}>
+                <Ionicons
+                  name={getServiceStatus('alerts') ? 'checkmark-circle' : 'close-circle'}
+                  size={24}
+                  color={getServiceStatus('alerts') ? '#10B981' : '#EF4444'}
+                />
+                <Text style={styles.serviceCardTitle}>Alerts</Text>
+                <Text style={styles.serviceCardText}>
+                  {getServiceStatus('alerts') ? 'Online' : 'Offline'}
+                </Text>
+              </View>
+              <View style={styles.serviceCard}>
+                <Ionicons
+                  name={getServiceStatus('expenses') ? 'checkmark-circle' : 'close-circle'}
+                  size={24}
+                  color={getServiceStatus('expenses') ? '#10B981' : '#EF4444'}
+                />
+                <Text style={styles.serviceCardTitle}>Expenses</Text>
+                <Text style={styles.serviceCardText}>
+                  {getServiceStatus('expenses') ? 'Online' : 'Offline'}
+                </Text>
+              </View>
+              <View style={styles.serviceCard}>
+                <Ionicons
+                  name={getServiceStatus('messages') ? 'checkmark-circle' : 'close-circle'}
+                  size={24}
+                  color={getServiceStatus('messages') ? '#10B981' : '#EF4444'}
+                />
+                <Text style={styles.serviceCardTitle}>Messages</Text>
+                <Text style={styles.serviceCardText}>
+                  {getServiceStatus('messages') ? 'Online' : 'Offline'}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Quick Actions */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                style={[styles.actionButton, !isEngineReady && styles.actionButtonDisabled]}
+                onPress={() => navigation.navigate('AlertsTab')}
+                disabled={!isEngineReady}
+              >
+                <Ionicons name="notifications" size={24} color={isEngineReady ? '#FFFFFF' : '#9CA3AF'} />
+                <Text style={[styles.actionButtonText, !isEngineReady && styles.actionButtonTextDisabled]}>
+                  View Alerts
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, !isEngineReady && styles.actionButtonDisabled]}
+                onPress={() => navigation.navigate('ProfileTab', { screen: 'Trips' })}
+                disabled={!isEngineReady}
+              >
+                <Ionicons name="car" size={24} color={isEngineReady ? '#FFFFFF' : '#9CA3AF'} />
+                <Text style={[styles.actionButtonText, !isEngineReady && styles.actionButtonTextDisabled]}>
+                  Start Trip
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, !isEngineReady && styles.actionButtonDisabled]}
+                onPress={() => navigation.navigate('ProfileTab', { screen: 'Expenses' })}
+                disabled={!isEngineReady}
+              >
+                <Ionicons name="receipt" size={24} color={isEngineReady ? '#FFFFFF' : '#9CA3AF'} />
+                <Text style={[styles.actionButtonText, !isEngineReady && styles.actionButtonTextDisabled]}>
+                  Track Expenses
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, !isEngineReady && styles.actionButtonDisabled]}
+                onPress={() => navigation.navigate('MessagesTab')}
+                disabled={!isEngineReady}
+              >
+                <Ionicons name="chatbubbles" size={24} color={isEngineReady ? '#FFFFFF' : '#9CA3AF'} />
+                <Text style={[styles.actionButtonText, !isEngineReady && styles.actionButtonTextDisabled]}>
+                  Messages
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Engine Info */}
+          <View style={styles.section}>
+            <View style={styles.infoCard}>
+              <Text style={styles.infoTitle}>Engine Information</Text>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>State:</Text>
+                <Text style={styles.infoValue}>{engineState}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Uptime:</Text>
+                <Text style={styles.infoValue}>{engineStatus.uptime}s</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Last Updated:</Text>
+                <Text style={styles.infoValue}>
+                  {engineStatus.lastUpdated.toLocaleTimeString()}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 };
-
-// Service status card component
-const ServiceCard: React.FC<{ name: string; active: boolean }> = ({ name, active }) => (
-  <View style={[styles.serviceCard, active ? styles.serviceCardActive : styles.serviceCardInactive]}>
-    <View style={[styles.serviceIndicator, { backgroundColor: active ? '#00ff00' : '#ff0000' }]} />
-    <Text style={styles.serviceName}>{name}</Text>
-    <Text style={[styles.serviceStatus, { color: active ? '#00ff00' : '#ff0000' }]}>
-      {active ? 'ONLINE' : 'OFFLINE'}
-    </Text>
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#F3F4F6',
+  },
+  content: {
+    flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: 16,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
+    color: '#111827',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#6B7280',
+    marginTop: 4,
   },
   summaryCard: {
-    backgroundColor: '#1a1a1a',
-    padding: 20,
-    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#333',
+    borderWidth: 2,
+    borderColor: '#10B981',
   },
   summaryCardError: {
-    borderColor: '#ff0000',
+    borderColor: '#EF4444',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 10,
+    fontWeight: '600',
+    color: '#111827',
   },
   cardText: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  cardSubtext: {
     fontSize: 14,
+    color: '#6B7280',
   },
   section: {
-    marginBottom: 25,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 15,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 12,
+  },
+  serviceGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -8,
+  },
+  serviceCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    width: '48%',
+    marginHorizontal: '1%',
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  serviceCardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+    marginTop: 8,
+  },
+  serviceCardText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 4,
   },
   actionButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginHorizontal: -8,
   },
   actionButton: {
-    backgroundColor: '#007aff',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    padding: 16,
+    width: '48%',
+    marginHorizontal: '1%',
+    marginBottom: 12,
     alignItems: 'center',
-    width: '31%',
   },
   actionButtonDisabled: {
-    backgroundColor: '#333',
-    opacity: 0.5,
-  },
-  actionIcon: {
-    fontSize: 24,
-    marginBottom: 8,
+    backgroundColor: '#9CA3AF',
   },
   actionButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: '600',
-    fontSize: 12,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1a1a1a',
-    padding: 16,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  menuItemDisabled: {
-    opacity: 0.5,
-  },
-  menuIcon: {
-    fontSize: 20,
-    marginRight: 15,
-  },
-  menuText: {
-    flex: 1,
-    color: '#fff',
-    fontSize: 16,
-  },
-  menuArrow: {
-    color: '#666',
-    fontSize: 24,
-  },
-  servicesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  serviceCard: {
-    width: '48%',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    borderWidth: 1,
-  },
-  serviceCardActive: {
-    backgroundColor: '#0a2a0a',
-    borderColor: '#00ff00',
-  },
-  serviceCardInactive: {
-    backgroundColor: '#2a0a0a',
-    borderColor: '#ff0000',
-  },
-  serviceIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginBottom: 6,
-  },
-  serviceName: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 2,
+    fontWeight: '600',
+    marginTop: 8,
   },
-  serviceStatus: {
-    fontSize: 10,
-    fontWeight: 'bold',
+  actionButtonTextDisabled: {
+    color: '#FFFFFF',
+    opacity: 0.7,
+  },
+  infoCard: {
+    backgroundColor: '#1F2937',
+    borderRadius: 12,
+    padding: 16,
+  },
+  infoTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
 });
 

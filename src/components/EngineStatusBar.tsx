@@ -1,160 +1,150 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useEngine } from '../contexts/EngineContext';
+import { View, Text, StyleSheet } from 'react-native';
+import { useEngine, EngineState } from '../contexts/EngineContext';
+import { Ionicons } from '@expo/vector-icons';
 
-interface EngineStatusBarProps {
-  showDetails?: boolean;
-  compact?: boolean;
-}
+const EngineStatusBar: React.FC = () => {
+  const { engineState, engineStatus, getServiceStatus } = useEngine();
 
-const EngineStatusBar: React.FC<EngineStatusBarProps> = ({ 
-  showDetails = false, 
-  compact = false 
-}) => {
-  const { engine, isReady, checkHealth, getStatusColor, getStatusText } = useEngine();
-
-  const formatLastHeartbeat = () => {
-    if (!engine.lastHeartbeat) return 'Never';
-    const seconds = Math.floor((Date.now() - engine.lastHeartbeat) / 1000);
-    if (seconds < 60) return `${seconds}s ago`;
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes}m ago`;
+  const getStatusColor = (state: EngineState): string => {
+    switch (state) {
+      case 'RUNNING':
+        return '#10B981';
+      case 'INITIALIZING':
+        return '#F59E0B';
+      case 'IDLE':
+        return '#6B7280';
+      case 'ERROR':
+        return '#EF4444';
+      case 'OFFLINE':
+        return '#374151';
+      default:
+        return '#6B7280';
+    }
   };
 
-  if (compact) {
-    return (
-      <View style={styles.compactContainer}>
-        <View style={[styles.statusDot, { backgroundColor: getStatusColor() }]} />
-        <Text style={[styles.compactText, { color: getStatusColor() }]}>
-          {engine.status}
-        </Text>
-      </View>
-    );
-  }
+  const getStatusText = (state: EngineState): string => {
+    switch (state) {
+      case 'RUNNING':
+        return 'ENGINE RUNNING';
+      case 'INITIALIZING':
+        return 'ENGINE INITIALIZING';
+      case 'IDLE':
+        return 'ENGINE IDLE';
+      case 'ERROR':
+        return 'ENGINE ERROR';
+      case 'OFFLINE':
+        return 'ENGINE OFFLINE';
+      default:
+        return 'UNKNOWN';
+    }
+  };
+
+  const statusColor = getStatusColor(engineState);
+  const statusText = getStatusText(engineState);
 
   return (
     <View style={styles.container}>
-      <View style={styles.mainRow}>
-        <View style={[styles.statusIndicator, { backgroundColor: getStatusColor() }]} />
-        <Text style={[styles.statusText, { color: getStatusColor() }]}>
-          {getStatusText()}
-        </Text>
-        <TouchableOpacity onPress={checkHealth} style={styles.refreshButton}>
-          <Text style={styles.refreshText}>↻</Text>
-        </TouchableOpacity>
+      <View style={styles.statusBar}>
+        <View style={[styles.indicator, { backgroundColor: statusColor }]} />
+        <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
+        <Text style={styles.uptimeText}>UPTIME: {engineStatus.uptime}s</Text>
       </View>
-
-      {showDetails && (
-        <View style={styles.detailsContainer}>
-          <Text style={styles.detailText}>
-            Last heartbeat: {formatLastHeartbeat()}
-          </Text>
-          
-          <View style={styles.servicesRow}>
-            <ServiceIndicator name="Auth" active={engine.services.auth} />
-            <ServiceIndicator name="Settings" active={engine.services.settings} />
-            <ServiceIndicator name="Trips" active={engine.services.trips} />
-            <ServiceIndicator name="Alerts" active={engine.services.alerts} />
-            <ServiceIndicator name="Expenses" active={engine.services.expenses} />
-            <ServiceIndicator name="Messages" active={engine.services.messages} />
-          </View>
-
-          {engine.errorMessage && (
-            <Text style={styles.errorText}>Error: {engine.errorMessage}</Text>
-          )}
+      <View style={styles.servicesContainer}>
+        <View style={styles.serviceItem}>
+          <Ionicons
+            name={getServiceStatus('auth') ? 'checkmark-circle' : 'close-circle'}
+            size={16}
+            color={getServiceStatus('auth') ? '#10B981' : '#6B7280'}
+          />
+          <Text style={styles.serviceText}>AUTH</Text>
         </View>
-      )}
+        <View style={styles.serviceItem}>
+          <Ionicons
+            name={getServiceStatus('settings') ? 'checkmark-circle' : 'close-circle'}
+            size={16}
+            color={getServiceStatus('settings') ? '#10B981' : '#6B7280'}
+          />
+          <Text style={styles.serviceText}>SETTINGS</Text>
+        </View>
+        <View style={styles.serviceItem}>
+          <Ionicons
+            name={getServiceStatus('trips') ? 'checkmark-circle' : 'close-circle'}
+            size={16}
+            color={getServiceStatus('trips') ? '#10B981' : '#6B7280'}
+          />
+          <Text style={styles.serviceText}>TRIPS</Text>
+        </View>
+        <View style={styles.serviceItem}>
+          <Ionicons
+            name={getServiceStatus('alerts') ? 'checkmark-circle' : 'close-circle'}
+            size={16}
+            color={getServiceStatus('alerts') ? '#10B981' : '#6B7280'}
+          />
+          <Text style={styles.serviceText}>ALERTS</Text>
+        </View>
+        <View style={styles.serviceItem}>
+          <Ionicons
+            name={getServiceStatus('expenses') ? 'checkmark-circle' : 'close-circle'}
+            size={16}
+            color={getServiceStatus('expenses') ? '#10B981' : '#6B7280'}
+          />
+          <Text style={styles.serviceText}>EXPENSES</Text>
+        </View>
+        <View style={styles.serviceItem}>
+          <Ionicons
+            name={getServiceStatus('messages') ? 'checkmark-circle' : 'close-circle'}
+            size={16}
+            color={getServiceStatus('messages') ? '#10B981' : '#6B7280'}
+          />
+          <Text style={styles.serviceText}>MESSAGES</Text>
+        </View>
+      </View>
     </View>
   );
 };
 
-const ServiceIndicator: React.FC<{ name: string; active: boolean }> = ({ name, active }) => (
-  <View style={styles.serviceItem}>
-    <View style={[styles.serviceDot, { backgroundColor: active ? '#00ff00' : '#ff0000' }]} />
-    <Text style={styles.serviceName}>{name}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1a1a1a',
-    padding: 10,
+    backgroundColor: '#1F2937',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: '#374151',
   },
-  mainRow: {
+  statusBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 8,
   },
-  statusIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     marginRight: 8,
   },
   statusText: {
     fontSize: 12,
-    fontWeight: 'bold',
-    flex: 1,
+    fontWeight: '600',
+    marginRight: 16,
   },
-  refreshButton: {
-    padding: 5,
+  uptimeText: {
+    fontSize: 10,
+    color: '#9CA3AF',
   },
-  refreshText: {
-    color: '#007aff',
-    fontSize: 18,
-  },
-  detailsContainer: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#333',
-  },
-  detailText: {
-    color: '#666',
-    fontSize: 11,
-    marginBottom: 6,
-  },
-  servicesRow: {
+  servicesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
   },
   serviceItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
   },
-  serviceDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 4,
-  },
-  serviceName: {
-    color: '#999',
+  serviceText: {
     fontSize: 10,
-  },
-  errorText: {
-    color: '#ff0000',
-    fontSize: 11,
-    marginTop: 6,
-  },
-  compactContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  compactText: {
-    fontSize: 10,
-    fontWeight: 'bold',
+    color: '#9CA3AF',
+    marginLeft: 4,
   },
 });
 
