@@ -1,18 +1,27 @@
 {
-  "name": "The Fictionverse",
-  "slug": "the-fictionverse-",
-  "version": "1.1.0",
-  "owner": "mortalash2025",
-  "runtimeVersion": "1.1.0",
-  "extra": {
-    "eas": {
-      "projectId": "21f983d2-2452-4cbe-8472-ebdcc8962bbc"
+  "expo": {
+    "name": "The Fictionverse",
+    "slug": "the-fictionverse-",
+    "version": "1.1.0",
+    "owner": "mortalash2025",
+    "runtimeVersion": "1.1.0",
+    "extra": {
+      "eas": {
+        "projectId": "21f983d2-2452-4cbe-8472-ebdcc8962bbc"
+      }
+    },
+    "android": {
+      "package": "com.anonymous.thefictionverse",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_AUDIO"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.thefictionverse"
     }
-  },
-  "android": {
-    "package": "com.anonymous.thefictionverse"
-  },
-  "ios": {
-    "bundleIdentifier": "com.anonymous.thefictionverse"
   }
 }

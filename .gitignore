@@ -70,5 +70,3 @@ coverage/
 # Native folders for Prebuild workflow
 /android
 /ios
-# Keep credentials
-!/android/credentials/
