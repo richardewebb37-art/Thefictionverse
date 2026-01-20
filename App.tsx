@@ -13,6 +13,7 @@ import { TripProvider } from './src/contexts/TripContext';
 import { AlertProvider } from './src/contexts/AlertContext';
 import { ExpenseProvider } from './src/contexts/ExpenseContext';
 import { MessageProvider } from './src/contexts/MessageContext';
+import { EngineProvider } from './src/contexts/EngineContext';
 
 // Screens
 import HomeScreen from './src/screens/HomeScreen';
@@ -250,21 +251,23 @@ export default function App() {
     <>
       <StatusBar style="light" />
       <SafeAreaProvider>
-        <AuthProvider>
-          <TripProvider>
-            <AlertProvider>
-              <ExpenseProvider>
-                <MessageProvider>
-                  <SettingsProvider>
-                    <NavigationContainer>
-                      <MainTabNavigator />
-                    </NavigationContainer>
-                  </SettingsProvider>
-                </MessageProvider>
-              </ExpenseProvider>
-            </AlertProvider>
-          </TripProvider>
-        </AuthProvider>
+        <EngineProvider>
+          <AuthProvider>
+            <TripProvider>
+              <AlertProvider>
+                <ExpenseProvider>
+                  <MessageProvider>
+                    <SettingsProvider>
+                      <NavigationContainer>
+                        <MainTabNavigator />
+                      </NavigationContainer>
+                    </SettingsProvider>
+                  </MessageProvider>
+                </ExpenseProvider>
+              </AlertProvider>
+            </TripProvider>
+          </AuthProvider>
+        </EngineProvider>
       </SafeAreaProvider>
     </>
   );
