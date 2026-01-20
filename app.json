@@ -2,9 +2,9 @@
   "expo": {
     "name": "The Fictionverse",
     "slug": "the-fictionverse-",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "owner": "mortalash2025",
-    "runtimeVersion": "1.1.0",
+    "runtimeVersion": "1.2.0",
     "extra": {
       "eas": {
         "projectId": "21f983d2-2452-4cbe-8472-ebdcc8962bbc"
