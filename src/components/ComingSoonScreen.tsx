@@ -16,7 +16,7 @@ const ComingSoonScreen: React.FC<ComingSoonScreenProps> = ({
 }) => {
   return (
     <SafeAreaView style={styles.container}>
-      <EngineStatusBar compact />
+      <EngineStatusBar />
       <View style={styles.content}>
         <Text style={styles.icon}>{icon}</Text>
         <Text style={styles.title}>{title}</Text>

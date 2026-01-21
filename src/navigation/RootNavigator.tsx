@@ -13,7 +13,13 @@ import ProfileScreen from '../screens/ProfileScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import TripScreen from '../screens/TripScreen';
 import ExpensesScreen from '../screens/ExpensesScreen';
-import ComingSoonScreen from '../components/ComingSoonScreen';
+import AdminScreen from '../screens/AdminScreen';
+import HelpScreen from '../screens/HelpScreen';
+import OneTapScreen from '../screens/OneTapScreen';
+import DirectCallScreen from '../screens/DirectCallScreen';
+import NavigationScreen from '../screens/NavigationScreen';
+import NotificationScreen from '../screens/NotificationScreen';
+import ReportsScreen from '../screens/ReportsScreen';
 
 // Types
 import { RootStackParamList, HomeTabParamList, AlertsTabParamList, MessagesTabParamList, ProfileTabParamList, MoreTabParamList } from '../types/navigation';
@@ -53,7 +59,7 @@ const HomeStackNavigator = () => {
       />
       <HomeStack.Screen
         name="Admin"
-        component={ComingSoonScreen}
+        component={AdminScreen}
         options={{
           headerShown: true,
           title: 'Admin Panel',
@@ -61,7 +67,7 @@ const HomeStackNavigator = () => {
       />
       <HomeStack.Screen
         name="Help"
-        component={ComingSoonScreen}
+        component={HelpScreen}
         options={{
           headerShown: true,
           title: 'Help Center',
@@ -69,15 +75,15 @@ const HomeStackNavigator = () => {
       />
       <HomeStack.Screen
         name="OneTap"
-        component={ComingSoonScreen}
+        component={OneTapScreen}
         options={{
           headerShown: true,
-          title: 'One Tap Access',
+          title: 'One Tap Actions',
         }}
       />
       <HomeStack.Screen
         name="DirectCall"
-        component={ComingSoonScreen}
+        component={DirectCallScreen}
         options={{
           headerShown: true,
           title: 'Direct Call',
@@ -85,7 +91,7 @@ const HomeStackNavigator = () => {
       />
       <HomeStack.Screen
         name="Navigation"
-        component={ComingSoonScreen}
+        component={NavigationScreen}
         options={{
           headerShown: true,
           title: 'Navigation',
@@ -93,7 +99,7 @@ const HomeStackNavigator = () => {
       />
       <HomeStack.Screen
         name="Notification"
-        component={ComingSoonScreen}
+        component={NotificationScreen}
         options={{
           headerShown: true,
           title: 'Notifications',
@@ -188,7 +194,7 @@ const MoreStackNavigator = () => {
     >
       <MoreStack.Screen
         name="Reports"
-        component={ComingSoonScreen}
+        component={ReportsScreen}
         options={{
           title: 'Reports',
         }}

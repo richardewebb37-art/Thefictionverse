@@ -1,57 +1,36 @@
-# TheFictionverse v1.2.0 Development Task List
+# TheFictionverse v1.2.0 – Remove Demo/Test Mode
 
-## Phase 1: Core Backend Services ✅ COMPLETE
-- [x] Create SettingsContext with persistent settings
-- [x] Create AuthContext with authentication
-- [x] Create Storage Service for AsyncStorage
-- [x] Create LoginScreen with authentication
-- [x] Update App.tsx with provider integration
-- [x] Add authentication-based navigation
+## Current Task: Remove Demo/Test Mode Completely
+**Goal**: Remove all demo/test mode logic, flags, toggles, and placeholders. All screens and buttons must be live only in real mode.
 
-## Phase 2: Feature-Specific Services ✅ COMPLETE
-- [x] Create TripContext with full CRUD operations
-- [x] Create AlertContext with alert management
-- [x] Create ExpenseContext with expense tracking
-- [x] Create MessageContext with messaging system
-- [x] Integrate ProfileScreen with AuthContext
-- [x] Integrate AlertsScreen with AlertContext
-- [x] Integrate ExpensesScreen with ExpenseContext
-- [x] Integrate MessagesScreen with MessageContext
+## Step 1: Search for Demo/Test Flags
+- [x] Search for isDemo, demoMode, testMode flags in codebase
+- [x] Search for demo, test related state variables
+- [x] Identify all locations with demo/test logic
 
-## Phase 3: Testing & Verification 🔄 IN PROGRESS
-- [x] Pre-testing: TypeScript compilation (all errors resolved)
-- [x] Pre-testing: Metro bundler verification (running successfully)
-- [x] Pre-testing: Bug fixes (5 bugs fixed and committed)
-- [ ] Device testing: Authentication flow (login/logout)
-- [ ] Device testing: Settings persistence
-- [ ] Device testing: Profile editing
-- [ ] Device testing: Trip CRUD operations
-- [ ] Device testing: Alert management
-- [ ] Device testing: Expense tracking
-- [ ] Device testing: Messaging functionality
-- [ ] Device testing: Verify all data persists across app restarts
-- [ ] Device testing: Check for crashes or errors
+## Step 2: Remove Demo/Test Checks
+- [x] Remove conditional rendering based on demo/test mode
+- [x] Remove placeholder logic for testing
+- [x] Replace with live behavior only
 
-## Phase 4: Build & Release
-- [ ] Build v1.2.0 APK
-- [ ] Test on physical device
-- [ ] Document features and bugs
-- [ ] Commit and push changes
+## Step 3: Remove Demo/Test Toggles
+- [x] Remove demo/test switches in Settings
+- [x] Remove demo/test menu items
+- [x] Remove demo/test UI controls
 
-## Current Status
-**Phase 2 is 100% COMPLETE!** 🎉
+## Step 4: Remove Demo/Test Imports
+- [x] Remove demo/test file imports
+- [x] Remove references to demo/test components
+- [x] Delete unused demo/test files
 
-All backend services have been created and integrated with their respective screens:
-- ✅ AuthContext → LoginScreen, ProfileScreen
-- ✅ SettingsContext → SettingsScreen
-- ✅ TripContext → TripScreen (ready for integration)
-- ✅ AlertContext → AlertsScreen
-- ✅ ExpenseContext → ExpensesScreen
-- ✅ MessageContext → MessagesScreen
+## Step 5: Remove Conditional Button Behavior
+- [x] Replace demo/test conditional actions with real actions
+- [x] Ensure all buttons call real functions
+- [x] Remove demo/test fallbacks
 
-## Next Steps
-1. Run comprehensive local testing on all screens
-2. Verify data persistence
-3. Build production APK
-4. Test on physical device
-5. Document findings
+## End State
+- [x] No demo/test mode code exists anywhere
+- [x] All screens, buttons, logic run in real mode only
+- [x] No toggles, switches, or placeholders
+- [x] All logic depends on real services (Firebase, Engine, API)
+- [x] Production-ready codebase

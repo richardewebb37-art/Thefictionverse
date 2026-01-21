@@ -8,7 +8,7 @@ export type HomeTabParamList = {
   Help: undefined;
   OneTap: undefined;
   DirectCall: undefined;
-  Stack: undefined;
+  Navigation: undefined;
   Notification: undefined;
 };
 

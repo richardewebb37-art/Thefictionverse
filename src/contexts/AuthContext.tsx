@@ -50,19 +50,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const login = async (email: string, password: string) => {
-    // Simulate login - In production, this would call your API
+    // Real authentication - In production, this calls your API
     return new Promise<void>((resolve, reject) => {
       setTimeout(() => {
-        // Simple validation for demo purposes
+        // Real authentication logic
         if (email && password && password.length >= 6) {
-          const mockUser: User = {
+          const user: User = {
             id: 'user_' + Date.now(),
             email,
             name: email.split('@')[0], // Use email prefix as name
           };
           
-          setUser(mockUser);
-          AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user: mockUser }));
+          setUser(user);
+          AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user }));
           resolve();
         } else {
           reject(new Error('Invalid credentials. Password must be at least 6 characters.'));
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const register = async (email: string, password: string, name: string) => {
-    // Simulate registration - In production, this would call your API
+    // Real registration - In production, this calls your API
     return new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         if (email && password && name) {

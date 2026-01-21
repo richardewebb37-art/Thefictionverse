@@ -1,53 +1,39 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-interface Trip {
-  id: string;
-  destination: string;
-  distance: string;
-  duration: string;
-  date: string;
-  status: 'completed' | 'in-progress' | 'scheduled';
-}
+import { useTrip, Trip } from '../contexts/TripContext';
 
 const TripScreen = () => {
-  const [trips, setTrips] = useState<Trip[]>([
-    { id: '1', destination: 'Downtown Office', distance: '12.5 km', duration: '25 min', date: '2024-01-19', status: 'completed' },
-    { id: '2', destination: 'Client Meeting', distance: '8.3 km', duration: '18 min', date: '2024-01-19', status: 'in-progress' },
-    { id: '3', destination: 'Airport Pickup', distance: '22.0 km', duration: '45 min', date: '2024-01-20', status: 'scheduled' },
-    { id: '4', destination: 'Warehouse Visit', distance: '15.2 km', duration: '32 min', date: '2024-01-21', status: 'scheduled' },
-  ]);
-
+  const { trips, addTrip, deleteTrip, loading } = useTrip();
+  
   const [modalVisible, setModalVisible] = useState(false);
   const [newTrip, setNewTrip] = useState({ destination: '', distance: '', duration: '', date: '' });
 
-  const addTrip = () => {
+  const handleAddTrip = () => {
     if (newTrip.destination && newTrip.distance) {
-      const trip: Trip = {
-        id: Date.now().toString(),
+      const tripData = {
         destination: newTrip.destination,
+        startDate: newTrip.date || new Date().toISOString().split('T')[0],
+        endDate: newTrip.date || new Date().toISOString().split('T')[0],
         distance: newTrip.distance,
-        duration: newTrip.duration || 'N/A',
-        date: newTrip.date || new Date().toISOString().split('T')[0],
-        status: 'scheduled',
+        status: 'upcoming' as const,
       };
-      setTrips([trip, ...trips]);
+      addTrip(tripData);
       setModalVisible(false);
       setNewTrip({ destination: '', distance: '', duration: '', date: '' });
     }
   };
 
-  const deleteTrip = (id: string) => {
-    setTrips(trips.filter(t => t.id !== id));
+  const handleDeleteTrip = (id: string) => {
+    deleteTrip(id);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '#00ff00';
-      case 'in-progress': return '#007aff';
-      case 'scheduled': return '#ff9900';
-      default: return '#999';
+      case 'completed': return '#10B981';
+      case 'ongoing': return '#3B82F6';
+      case 'upcoming': return '#F59E0B';
+      default: return '#6B7280';
     }
   };
 
@@ -58,16 +44,15 @@ const TripScreen = () => {
         <View style={styles.tripHeader}>
           <Text style={styles.tripDestination}>{item.destination}</Text>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-            <Text style={styles.statusText}>{item.status.replace('-', ' ').toUpperCase()}</Text>
+            <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
           </View>
         </View>
         <View style={styles.tripDetails}>
-          <Text style={styles.tripDetail}>📍 {item.distance}</Text>
-          <Text style={styles.tripDetail}>⏱ {item.duration}</Text>
-          <Text style={styles.tripDetail}>📅 {item.date}</Text>
+          <Text style={styles.tripDetail}>📍 {item.distance || 'N/A'}</Text>
+          <Text style={styles.tripDetail}>📅 {item.startDate} - {item.endDate}</Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteTrip(item.id)}>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteTrip(item.id)}>
         <Text style={styles.deleteButtonText}>✕</Text>
       </TouchableOpacity>
     </TouchableOpacity>
@@ -80,32 +65,25 @@ const TripScreen = () => {
         <Text style={styles.subtitle}>{trips.length} trips</Text>
       </View>
 
-      <View style={styles.summaryCards}>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryValue}>{trips.filter(t => t.status === 'completed').length}</Text>
-          <Text style={styles.summaryLabel}>Completed</Text>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading trips...</Text>
         </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryValue}>{trips.filter(t => t.status === 'in-progress').length}</Text>
-          <Text style={styles.summaryLabel}>In Progress</Text>
+      ) : trips.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No trips yet</Text>
+          <Text style={styles.emptySubtext}>Add your first trip to get started</Text>
         </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryValue}>{trips.filter(t => t.status === 'scheduled').length}</Text>
-          <Text style={styles.summaryLabel}>Scheduled</Text>
-        </View>
-      </View>
+      ) : (
+        <FlatList
+          data={trips}
+          renderItem={renderTrip}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
 
-      <FlatList
-        data={trips}
-        renderItem={renderTrip}
-        keyExtractor={item => item.id}
-        style={styles.list}
-      />
-
-      <TouchableOpacity 
-        style={styles.addButton}
-        onPress={() => setModalVisible(true)}
-      >
+      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
         <Text style={styles.addButtonText}>+ Add Trip</Text>
       </TouchableOpacity>
 
@@ -150,20 +128,13 @@ const TripScreen = () => {
               value={newTrip.date}
               onChangeText={(text) => setNewTrip({ ...newTrip, date: text })}
             />
-
+            
             <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setModalVisible(false)}
-              >
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.saveButton]}
-                onPress={addTrip}
-              >
-                <Text style={styles.saveButtonText}>Add Trip</Text>
+              <TouchableOpacity style={styles.saveButton} onPress={handleAddTrip}>
+                <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -176,62 +147,72 @@ const TripScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#F3F4F6',
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 20,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: '#E5E7EB',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
+    color: '#111827',
   },
   subtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    color: '#6B7280',
   },
-  summaryCards: {
-    flexDirection: 'row',
-    padding: 15,
-    justifyContent: "space-between",
-  },
-  summaryCard: {
+  loadingContainer: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
-    padding: 15,
-    borderRadius: 10,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  summaryValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
+  loadingText: {
+    fontSize: 16,
+    color: '#6B7280',
   },
-  summaryLabel: {
-    fontSize: 12,
-    color: '#999',
-  },
-  list: {
+  emptyContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  listContent: {
+    padding: 16,
   },
   tripCard: {
     flexDirection: 'row',
-    backgroundColor: '#1a1a1a',
-    marginHorizontal: 15,
-    marginVertical: 8,
-    padding: 15,
-    borderRadius: 10,
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statusIndicator: {
     width: 4,
-    height: 60,
+    height: '100%',
     borderRadius: 2,
-    marginRight: 15,
+    marginRight: 12,
   },
   tripContent: {
     flex: 1,
@@ -240,102 +221,117 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   tripDestination: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
     flex: 1,
   },
   statusBadge: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   statusText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   tripDetails: {
     flexDirection: 'row',
-    justifyContent: "space-between",
+    flexWrap: 'wrap',
   },
   tripDetail: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: 14,
+    color: '#6B7280',
+    marginRight: 16,
+    marginBottom: 4,
   },
   deleteButton: {
-    padding: 10,
+    padding: 8,
+    marginLeft: 8,
   },
   deleteButtonText: {
-    color: '#ff0000',
     fontSize: 20,
+    color: '#EF4444',
+    fontWeight: 'bold',
   },
   addButton: {
-    backgroundColor: '#007aff',
-    margin: 15,
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#3B82F6',
+    margin: 16,
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   addButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#1a1a1a',
-    padding: 30,
-    borderRadius: 15,
-    width: '80%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxWidth: 400,
   },
   modalTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#111827',
     marginBottom: 20,
   },
   input: {
-    backgroundColor: '#000',
-    color: '#fff',
-    padding: 15,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     borderRadius: 8,
-    marginBottom: 15,
+    padding: 12,
+    marginBottom: 12,
     fontSize: 16,
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  modalButton: {
-    flex: 1,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
+    marginTop: 8,
   },
   cancelButton: {
-    backgroundColor: '#333',
-    marginRight: 10,
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    padding: 12,
+    borderRadius: 8,
+    marginRight: 8,
+    alignItems: 'center',
   },
   cancelButtonText: {
-    color: '#fff',
+    color: '#6B7280',
+    fontSize: 16,
+    fontWeight: '600',
   },
   saveButton: {
-    backgroundColor: '#007aff',
-    marginLeft: 10,
+    flex: 1,
+    backgroundColor: '#3B82F6',
+    padding: 12,
+    borderRadius: 8,
+    marginLeft: 8,
+    alignItems: 'center',
   },
   saveButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
