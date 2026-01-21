@@ -26,6 +26,7 @@ export default function App() {
                 <MessageProvider>
                   <SettingsProvider>
                     <RootNavigator />
+                    <StatusBar style="light" />
                   </SettingsProvider>
                 </MessageProvider>
               </ExpenseProvider>
