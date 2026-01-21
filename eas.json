@@ -11,8 +11,7 @@
         "credentialsSource": "local"
       },
       "env": {
-        "NODE_ENV": "production",
-        "EXPO_TOKEN": ""
+        "NODE_ENV": "production"
       }
     }
   }
