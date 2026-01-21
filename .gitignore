@@ -72,3 +72,8 @@ coverage/
 /ios
 # Keep credentials
 !/android/credentials/
+!.credentials/
+
+# But don't commit sensitive data
+.credentials/.env
+credentials.json
