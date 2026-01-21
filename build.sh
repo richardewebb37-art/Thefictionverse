@@ -42,4 +42,5 @@ echo "=========================================="
 echo ""
 
 # Submit build to EAS (NO project creation - build to existing project only)
-npx eas build --platform android --profile production --non-interactive
+# Note: --non-interactive removed to allow EAS to generate credentials on first build
+npx eas build --platform android --profile production
