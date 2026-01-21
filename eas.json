@@ -10,8 +10,7 @@
         "buildType": "apk"
       },
       "env": {
-        "NODE_ENV": "production",
-        "EXPO_TOKEN": "$EXPO_TOKEN"
+        "NODE_ENV": "production"
       }
     }
   }
